@@ -12,12 +12,14 @@ import (
 )
 
 func main() {
+	var redisURL = os.Getenv("REDIS_URL")
 	pool := &redis.Pool{
 		MaxIdle:   30,
 		MaxActive: 30,
 		Wait:      true,
 		Dial: func() (redis.Conn, error) {
-			conn, err := redis.DialURL(os.Getenv("REDIS_URL"))
+			log.Println("Connecting", redisURL)
+			conn, err := redis.DialURL(redisURL)
 			if err != nil {
 				log.Panic("Could not connect to redis. Cause: " + err.Error())
 				return nil, err
