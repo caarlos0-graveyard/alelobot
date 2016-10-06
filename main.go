@@ -36,16 +36,15 @@ func main() {
 	}
 
 	for update := range updates {
+		log.Println("Message from:", update.Message.From.UserName)
 		if update.Message == nil {
 			continue
 		}
 		if update.Message.Command() == "login" {
-			log.Println("user login")
 			go login(conn, bot, update)
 			continue
 		}
 		if update.Message.Command() == "balance" {
-			log.Println("balance")
 			go balance(conn, bot, update)
 			continue
 		}
