@@ -12,11 +12,19 @@ import (
 )
 
 func main() {
-	conn, err := redis.DialURL(os.Getenv("REDIS_URL"))
-	if err != nil {
-		log.Panic(err)
+	pool := &redis.Pool{
+		MaxIdle:   1,
+		MaxActive: 10,
+		Dial: func() (redis.Conn, error) {
+			conn, err := redis.DialURL(os.Getenv("REDIS_URL"))
+			if err != nil {
+				log.Panic("Could not connect to redis. Cause: " + err.Error())
+				return nil, err
+			}
+			return conn, err
+		},
 	}
-	defer conn.Close()
+	defer pool.Close()
 
 	bot, err := tgbotapi.NewBotAPI(os.Getenv("TELEGRAM_TOKEN"))
 	if err != nil {
@@ -42,11 +50,11 @@ func main() {
 		}
 		log.Println("Message from:", *update.Message.From)
 		if update.Message.Command() == "login" {
-			go login(conn, bot, update)
+			go login(pool, bot, update)
 			continue
 		}
 		if update.Message.Command() == "balance" {
-			go balance(conn, bot, update)
+			go balance(pool, bot, update)
 			continue
 		}
 		log.Println("Unknown command", update.Message.Text)
@@ -57,10 +65,10 @@ func main() {
 	}
 }
 
-func balance(conn redis.Conn, bot *tgbotapi.BotAPI, update tgbotapi.Update) {
+func balance(pool *redis.Pool, bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	id := string(update.Message.From.ID)
-	cpf, _ := redis.String(conn.Do("GET", id+".cpf"))
-	pwd, _ := redis.String(conn.Do("GET", id+".pwd"))
+	cpf, _ := redis.String(pool.Get().Do("GET", id+".cpf"))
+	pwd, _ := redis.String(pool.Get().Do("GET", id+".pwd"))
 	if cpf == "" || pwd == "" {
 		bot.Send(tgbotapi.NewMessage(
 			update.Message.Chat.ID,
@@ -88,7 +96,7 @@ func balance(conn redis.Conn, bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	}
 }
 
-func login(conn redis.Conn, bot *tgbotapi.BotAPI, update tgbotapi.Update) {
+func login(pool *redis.Pool, bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	parts := strings.Split(
 		strings.TrimSpace(update.Message.CommandArguments()), " ",
 	)
@@ -107,13 +115,13 @@ func login(conn redis.Conn, bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 		return
 	}
 	id := string(update.Message.From.ID)
-	_, err = conn.Do("SET", id+".cpf", cpf)
+	_, err = pool.Get().Do("SET", id+".cpf", cpf)
 	if err != nil {
 		log.Println(err.Error())
 		bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, err.Error()))
 		return
 	}
-	_, err = conn.Do("SET", id+".pwd", pwd)
+	_, err = pool.Get().Do("SET", id+".pwd", pwd)
 	if err != nil {
 		log.Println(err.Error())
 		bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, err.Error()))
