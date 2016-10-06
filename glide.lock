@@ -1,8 +1,8 @@
 hash: bc8cf71d2c43e74fe7f0a17f6c72cccd52bd75f93bd6b417bfec8926f7efa308
-updated: 2016-10-05T22:12:08.093770826-03:00
+updated: 2016-10-06T01:24:56.083087771-03:00
 imports:
 - name: github.com/caarlos0/alelogo
-  version: a7a68cb74c1576a11451f0b94895807a3c2ce49c
+  version: f96fde0cead8520457226b4b3255be0f50249f64
 - name: github.com/garyburd/redigo
   version: 8873b2f1995f59d4bcdd2b0dc9858e2cb9bf0c13
   subpackages:
