@@ -36,16 +36,17 @@ func main() {
 	}
 
 	for update := range updates {
+		update := update
 		if update.Message == nil {
 			continue
 		}
 		log.Println("Message from:", *update.Message.From)
 		if update.Message.Command() == "login" {
-			login(conn, bot, update)
+			go login(conn, bot, update)
 			continue
 		}
 		if update.Message.Command() == "balance" {
-			balance(conn, bot, update)
+			go balance(conn, bot, update)
 			continue
 		}
 		log.Println("Unknown command", update.Message.Text)
