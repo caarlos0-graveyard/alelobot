@@ -57,7 +57,7 @@ func main() {
 }
 
 func balance(conn redis.Conn, bot *tgbotapi.BotAPI, update tgbotapi.Update) {
-	id := string(update.Message.Chat.ID)
+	id := string(update.Message.From.ID)
 	cpf, _ := redis.String(conn.Do("GET", id+".cpf"))
 	pwd, _ := redis.String(conn.Do("GET", id+".pwd"))
 	if cpf == "" || pwd == "" {
@@ -102,7 +102,7 @@ func login(conn redis.Conn, bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 		bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, err.Error()))
 		return
 	}
-	id := string(update.Message.Chat.ID)
+	id := string(update.Message.From.ID)
 	_, err = conn.Do("SET", id+".cpf", cpf)
 	if err != nil {
 		bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, err.Error()))
