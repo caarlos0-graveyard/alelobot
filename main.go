@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"net/http"
 	"os"
 	"strings"
 
@@ -11,18 +12,20 @@ import (
 )
 
 func main() {
-	bot, err := tgbotapi.NewBotAPI(os.Getenv("TELEGRAM_TOKEN"))
-	if err != nil {
-		log.Panic(err)
-	}
-
 	conn, err := redis.DialURL(os.Getenv("REDIS_URL"))
 	if err != nil {
 		log.Panic(err)
 	}
 	defer conn.Close()
 
+	bot, err := tgbotapi.NewBotAPI(os.Getenv("TELEGRAM_TOKEN"))
+	if err != nil {
+		log.Panic(err)
+	}
 	log.Printf("Authorized on account %s", bot.Self.UserName)
+
+	// without a port binded, heroku complains and eventually kills the process.
+	go serve()
 
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
@@ -112,4 +115,11 @@ func login(conn redis.Conn, bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 		return
 	}
 	bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, "Sucesso!"))
+}
+
+func serve() {
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("OK"))
+	})
+	http.ListenAndServe(":"+os.Getenv("PORT"), nil)
 }
