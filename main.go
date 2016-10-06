@@ -36,7 +36,7 @@ func main() {
 	}
 
 	for update := range updates {
-		log.Println("Message from:", update.Message.From.UserName)
+		log.Println("Message from:", *update.Message.From)
 		if update.Message == nil {
 			continue
 		}
