@@ -92,7 +92,7 @@ func login(conn redis.Conn, bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	if len(parts) != 2 {
 		bot.Send(tgbotapi.NewMessage(
 			update.Message.Chat.ID,
-			"Para fazer login, diga\n /login CPF Senha",
+			"Para fazer login, diga\n\n/login CPF Senha",
 		))
 		return
 	}
