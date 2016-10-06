@@ -36,10 +36,10 @@ func main() {
 	}
 
 	for update := range updates {
-		log.Println("Message from:", *update.Message.From)
 		if update.Message == nil {
 			continue
 		}
+		log.Println("Message from:", *update.Message.From)
 		if update.Message.Command() == "login" {
 			login(conn, bot, update)
 			continue
@@ -94,7 +94,7 @@ func login(conn redis.Conn, bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 			update.Message.Chat.ID,
 			"Para fazer login, diga<br/>/login <b>CPF Senha</b>",
 		)
-		msg.ParseMode = "HTML"
+		msg.ParseMode = tgbotapi.ModeHTML
 		bot.Send(msg)
 		return
 	}
