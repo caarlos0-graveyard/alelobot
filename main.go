@@ -13,8 +13,9 @@ import (
 
 func main() {
 	pool := &redis.Pool{
-		MaxIdle:   1,
-		MaxActive: 10,
+		MaxIdle:   30,
+		MaxActive: 30,
+		Wait:      true,
 		Dial: func() (redis.Conn, error) {
 			conn, err := redis.DialURL(os.Getenv("REDIS_URL"))
 			if err != nil {
