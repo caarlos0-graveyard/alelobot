@@ -37,13 +37,16 @@ func main() {
 			continue
 		}
 		if update.Message.Command() == "login" {
+			log.Println("user login")
 			login(conn, bot, update)
 			continue
 		}
 		if update.Message.Command() == "balance" {
+			log.Println("balance")
 			balance(conn, bot, update)
 			continue
 		}
+		log.Println("Unknown command", update.Message.Text)
 		bot.Send(tgbotapi.NewMessage(
 			update.Message.Chat.ID,
 			"Desculpe, não entendi...",
