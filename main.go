@@ -41,17 +41,17 @@ func main() {
 			continue
 		}
 		if update.Message.Command() == "login" {
-			go login(conn, bot, update)
+			login(conn, bot, update)
 			continue
 		}
 		if update.Message.Command() == "balance" {
-			go balance(conn, bot, update)
+			balance(conn, bot, update)
 			continue
 		}
 		log.Println("Unknown command", update.Message.Text)
 		bot.Send(tgbotapi.NewMessage(
 			update.Message.Chat.ID,
-			"Desculpe, não entendi...",
+			"Os únicos comandos suportados são /login e /balance",
 		))
 	}
 }
