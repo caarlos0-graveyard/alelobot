@@ -1,0 +1,8 @@
+package: github.com/caarlos0/alelobot
+import:
+- package: github.com/go-telegram-bot-api/telegram-bot-api
+  version: ~4.5.1
+- package: github.com/garyburd/redigo
+  version: ~1.0.0
+  subpackages:
+  - redis
