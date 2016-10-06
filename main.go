@@ -16,7 +16,7 @@ func main() {
 		log.Panic(err)
 	}
 
-	conn, err := redis.Dial("tcp", os.Getenv("REDIS_URL"))
+	conn, err := redis.DialURL(os.Getenv("REDIS_URL"))
 	if err != nil {
 		log.Panic(err)
 	}
