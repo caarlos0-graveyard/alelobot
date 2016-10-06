@@ -70,11 +70,13 @@ func balance(conn redis.Conn, bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	}
 	client, err := alelogo.New(cpf, pwd)
 	if err != nil {
+		log.Println(err.Error())
 		bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, err.Error()))
 		return
 	}
 	cards, err := client.Balance()
 	if err != nil {
+		log.Println(err.Error())
 		bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, err.Error()))
 		return
 	}
@@ -100,17 +102,20 @@ func login(conn redis.Conn, bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	cpf, pwd := parts[0], parts[1]
 	_, err := alelogo.New(cpf, pwd)
 	if err != nil {
+		log.Println(err.Error())
 		bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, err.Error()))
 		return
 	}
 	id := string(update.Message.From.ID)
 	_, err = conn.Do("SET", id+".cpf", cpf)
 	if err != nil {
+		log.Println(err.Error())
 		bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, err.Error()))
 		return
 	}
 	_, err = conn.Do("SET", id+".pwd", pwd)
 	if err != nil {
+		log.Println(err.Error())
 		bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, err.Error()))
 		return
 	}
