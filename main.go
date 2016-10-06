@@ -90,12 +90,10 @@ func login(conn redis.Conn, bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 		strings.TrimSpace(update.Message.CommandArguments()), " ",
 	)
 	if len(parts) != 2 {
-		msg := tgbotapi.NewMessage(
+		bot.Send(tgbotapi.NewMessage(
 			update.Message.Chat.ID,
-			"Para fazer login, diga<br/>/login <b>CPF Senha</b>",
-		)
-		msg.ParseMode = tgbotapi.ModeHTML
-		bot.Send(msg)
+			"Para fazer login, diga\n /login CPF Senha",
+		))
 		return
 	}
 	cpf, pwd := parts[0], parts[1]
