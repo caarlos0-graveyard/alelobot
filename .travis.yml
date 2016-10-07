@@ -1,2 +1,6 @@
 language: go
 go: 1.7
+deploy:
+  provider: heroku
+  api_key: "$HEROKU_API_KEY"
+  app: alelobot
