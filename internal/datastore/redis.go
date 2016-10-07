@@ -6,12 +6,14 @@ import (
 	"github.com/garyburd/redigo/redis"
 )
 
+// Datastore stores data somewhere
 type Datastore interface {
 	Save(userID int, cpf, pwd string) error
 	Retrieve(userID int) (cpf, pwd string, err error)
 	Close() error
 }
 
+// NewRedis Datastore implementation
 func NewRedis(url string) Datastore {
 	return &redisDS{
 		&redis.Pool{
@@ -22,7 +24,9 @@ func NewRedis(url string) Datastore {
 				log.Println("Connecting", url)
 				conn, err := redis.DialURL(url)
 				if err != nil {
-					log.Panic("Could not connect to redis. Cause: " + err.Error())
+					log.Panic(
+						"Could not connect to redis. Cause: " + err.Error(),
+					)
 					return nil, err
 				}
 				return conn, err
@@ -35,10 +39,12 @@ type redisDS struct {
 	pool *redis.Pool
 }
 
+// Close the DS
 func (r *redisDS) Close() error {
 	return r.pool.Close()
 }
 
+// Save the given user info
 func (r *redisDS) Save(userID int, cpf, pwd string) error {
 	id := string(userID)
 	conn := r.pool.Get()
@@ -50,6 +56,7 @@ func (r *redisDS) Save(userID int, cpf, pwd string) error {
 	return err
 }
 
+// Retrieve user info
 func (r *redisDS) Retrieve(userID int) (cpf, pwd string, err error) {
 	id := string(userID)
 	conn := r.pool.Get()
