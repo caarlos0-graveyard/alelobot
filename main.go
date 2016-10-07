@@ -6,28 +6,14 @@ import (
 	"os"
 	"strings"
 
+	"github.com/caarlos0/alelobot/internal/datastore"
 	"github.com/caarlos0/alelogo"
-	"github.com/garyburd/redigo/redis"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 func main() {
-	var redisURL = os.Getenv("REDIS_URL")
-	pool := &redis.Pool{
-		MaxIdle:   30,
-		MaxActive: 30,
-		Wait:      true,
-		Dial: func() (redis.Conn, error) {
-			log.Println("Connecting", redisURL)
-			conn, err := redis.DialURL(redisURL)
-			if err != nil {
-				log.Panic("Could not connect to redis. Cause: " + err.Error())
-				return nil, err
-			}
-			return conn, err
-		},
-	}
-	defer pool.Close()
+	ds := datastore.NewRedis(os.Getenv("REDIS_URL"))
+	defer ds.Close()
 
 	bot, err := tgbotapi.NewBotAPI(os.Getenv("TELEGRAM_TOKEN"))
 	if err != nil {
@@ -53,11 +39,11 @@ func main() {
 		}
 		log.Println("Message from:", *update.Message.From)
 		if update.Message.Command() == "login" {
-			go login(pool, bot, update)
+			go login(ds, bot, update)
 			continue
 		}
 		if update.Message.Command() == "balance" {
-			go balance(pool, bot, update)
+			go balance(ds, bot, update)
 			continue
 		}
 		log.Println("Unknown command", update.Message.Text)
@@ -68,13 +54,9 @@ func main() {
 	}
 }
 
-func balance(pool *redis.Pool, bot *tgbotapi.BotAPI, update tgbotapi.Update) {
-	id := string(update.Message.From.ID)
-	conn := pool.Get()
-	defer conn.Close()
-	cpf, _ := redis.String(conn.Do("GET", id+".cpf"))
-	pwd, _ := redis.String(conn.Do("GET", id+".pwd"))
-	if cpf == "" || pwd == "" {
+func balance(ds datastore.Datastore, bot *tgbotapi.BotAPI, update tgbotapi.Update) {
+	cpf, pwd, err := ds.Retrieve(update.Message.From.ID)
+	if cpf == "" || pwd == "" || err != nil {
 		bot.Send(tgbotapi.NewMessage(
 			update.Message.Chat.ID,
 			"Por favor, faça login novamente...",
@@ -101,7 +83,7 @@ func balance(pool *redis.Pool, bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	}
 }
 
-func login(pool *redis.Pool, bot *tgbotapi.BotAPI, update tgbotapi.Update) {
+func login(ds datastore.Datastore, bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	parts := strings.Split(
 		strings.TrimSpace(update.Message.CommandArguments()), " ",
 	)
@@ -113,23 +95,12 @@ func login(pool *redis.Pool, bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 		return
 	}
 	cpf, pwd := parts[0], parts[1]
-	_, err := alelogo.New(cpf, pwd)
-	if err != nil {
+	if _, err := alelogo.New(cpf, pwd); err != nil {
 		log.Println(err.Error())
 		bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, err.Error()))
 		return
 	}
-	id := string(update.Message.From.ID)
-	conn := pool.Get()
-	defer conn.Close()
-	_, err = conn.Do("SET", id+".cpf", cpf)
-	if err != nil {
-		log.Println(err.Error())
-		bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, err.Error()))
-		return
-	}
-	_, err = conn.Do("SET", id+".pwd", pwd)
-	if err != nil {
+	if err := ds.Save(update.Message.From.ID, cpf, pwd); err != nil {
 		log.Println(err.Error())
 		bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, err.Error()))
 		return
