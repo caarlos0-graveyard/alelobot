@@ -59,7 +59,7 @@ func balance(ds datastore.Datastore, bot *tgbotapi.BotAPI, update tgbotapi.Updat
 	if cpf == "" || pwd == "" || err != nil {
 		bot.Send(tgbotapi.NewMessage(
 			update.Message.Chat.ID,
-			"Por favor, faça login novamente...",
+			"Por favor, faça /login...",
 		))
 		return
 	}
@@ -78,7 +78,7 @@ func balance(ds datastore.Datastore, bot *tgbotapi.BotAPI, update tgbotapi.Updat
 	for _, card := range cards {
 		bot.Send(tgbotapi.NewMessage(
 			update.Message.Chat.ID,
-			"Saldo do cartao "+strings.TrimSpace(card.Title)+" é "+card.Balance,
+			"Saldo do cartão "+strings.TrimSpace(card.Title)+" é "+card.Balance,
 		))
 	}
 }
@@ -105,7 +105,9 @@ func login(ds datastore.Datastore, bot *tgbotapi.BotAPI, update tgbotapi.Update)
 		bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, err.Error()))
 		return
 	}
-	bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, "Sucesso!"))
+	bot.Send(tgbotapi.NewMessage(
+		update.Message.Chat.ID, "Sucesso, agora é só dizer /balance!",
+	))
 }
 
 func serve() {
