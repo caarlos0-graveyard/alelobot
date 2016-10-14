@@ -1,5 +1,5 @@
 language: go
-go: 1.7
+go: 1.7.1
 deploy:
   provider: heroku
   api_key: "$HEROKU_API_KEY"
