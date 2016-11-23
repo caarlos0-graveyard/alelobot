@@ -69,16 +69,22 @@ func balance(ds datastore.Datastore, bot *tgbotapi.BotAPI, update tgbotapi.Updat
 		bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, err.Error()))
 		return
 	}
-	cards, err := client.Balance()
+	cards, err := client.Cards()
 	if err != nil {
 		log.Println(err.Error())
 		bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, err.Error()))
 		return
 	}
 	for _, card := range cards {
+		details, err := client.Details(card)
+		if err != nil {
+			log.Println(err.Error())
+			bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, err.Error()))
+			return
+		}
 		bot.Send(tgbotapi.NewMessage(
 			update.Message.Chat.ID,
-			"Saldo do cartão "+strings.TrimSpace(card.Title)+" é "+card.Balance,
+			"Saldo do cartão "+strings.TrimSpace(card.Title)+" é "+details.Balance,
 		))
 	}
 }
