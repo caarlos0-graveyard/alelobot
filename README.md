@@ -1,5 +1,5 @@
-# alelobot
+# alelobot [![Build Status](https://travis-ci.org/caarlos0/alelobot.svg?branch=master)](https://travis-ci.org/caarlos0/alelobot)
 
 A Telegram bot to get Alelo card's balance!
 
-[![image](https://cloud.githubusercontent.com/assets/245435/19137716/5496d4da-8b4c-11e6-9911-78bcea9fc37b.png)](http://telegram.me/alelobot)
+[![bot screenshot](https://cloud.githubusercontent.com/assets/245435/20578744/07e58bb0-b1b0-11e6-8e24-9d3979ae0bca.png)](http://telegram.me/alelobot)
