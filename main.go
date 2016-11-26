@@ -42,7 +42,7 @@ func main() {
 			"From":   update.Message.From.UserName,
 		}).Info("New Message")
 		if update.Message.Command() == "login" {
-			go login(ds, bot, update)
+			login(ds, bot, update)
 			continue
 		}
 		if update.Message.Command() == "balance" {
