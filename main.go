@@ -39,7 +39,7 @@ func main() {
 		}
 		log.WithFields(log.Fields{
 			"ChatID": update.Message.Chat.ID,
-			"From":   *update.Message.From,
+			"From":   update.Message.From.UserName,
 		}).Info("New Message")
 		if update.Message.Command() == "login" {
 			go login(ds, bot, update)
@@ -51,7 +51,7 @@ func main() {
 		}
 		log.WithFields(log.Fields{
 			"ChatID": update.Message.Chat.ID,
-			"From":   *update.Message.From,
+			"From":   update.Message.From.UserName,
 		}).Info("Unknown command", update.Message.Text)
 		bot.Send(tgbotapi.NewMessage(
 			update.Message.Chat.ID,
@@ -65,7 +65,7 @@ func balance(ds datastore.Datastore, bot *tgbotapi.BotAPI, update tgbotapi.Updat
 	if cpf == "" || pwd == "" || err != nil {
 		log.WithFields(log.Fields{
 			"ChatID": update.Message.Chat.ID,
-			"From":   *update.Message.From,
+			"From":   update.Message.From.UserName,
 		}).Info("Not logged in, telling user to do that")
 		bot.Send(tgbotapi.NewMessage(
 			update.Message.Chat.ID,
@@ -77,9 +77,9 @@ func balance(ds datastore.Datastore, bot *tgbotapi.BotAPI, update tgbotapi.Updat
 	if err != nil {
 		log.WithFields(log.Fields{
 			"ChatID": update.Message.Chat.ID,
-			"From":   *update.Message.From,
+			"From":   update.Message.From.UserName,
 			"cpf":    cpf,
-		}).Info(err.Error())
+		}).Error(err.Error())
 		bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, err.Error()))
 		return
 	}
@@ -87,15 +87,15 @@ func balance(ds datastore.Datastore, bot *tgbotapi.BotAPI, update tgbotapi.Updat
 	if err != nil {
 		log.WithFields(log.Fields{
 			"ChatID": update.Message.Chat.ID,
-			"From":   *update.Message.From,
+			"From":   update.Message.From.UserName,
 			"cpf":    cpf,
-		}).Info(err.Error())
+		}).Error(err.Error())
 		bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, err.Error()))
 		return
 	}
 	log.WithFields(log.Fields{
 		"ChatID": update.Message.Chat.ID,
-		"From":   *update.Message.From,
+		"From":   update.Message.From.UserName,
 		"cpf":    cpf,
 	}).Info("Got user cards", cards)
 	for _, card := range cards {
@@ -106,7 +106,7 @@ func balance(ds datastore.Datastore, bot *tgbotapi.BotAPI, update tgbotapi.Updat
 				"From":    *update.Message.From,
 				"cpf":     cpf,
 				"card_id": card.ID,
-			}).Info(err.Error())
+			}).Error(err.Error())
 			bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, err.Error()))
 			return
 		}
@@ -136,15 +136,28 @@ func login(ds datastore.Datastore, bot *tgbotapi.BotAPI, update tgbotapi.Update)
 	}
 	cpf, pwd := parts[0], parts[1]
 	if _, err := alelogo.New(cpf, pwd); err != nil {
-		log.Println(err.Error())
+		log.WithFields(log.Fields{
+			"ChatID": update.Message.Chat.ID,
+			"From":   *update.Message.From,
+			"cpf":    cpf,
+		}).Error(err.Error())
 		bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, err.Error()))
 		return
 	}
 	if err := ds.Save(update.Message.From.ID, cpf, pwd); err != nil {
-		log.Println(err.Error())
+		log.WithFields(log.Fields{
+			"ChatID": update.Message.Chat.ID,
+			"From":   *update.Message.From,
+			"cpf":    cpf,
+		}).Error(err.Error())
 		bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, err.Error()))
 		return
 	}
+	log.WithFields(log.Fields{
+		"ChatID": update.Message.Chat.ID,
+		"From":   *update.Message.From,
+		"cpf":    cpf,
+	}).Info("Login success")
 	bot.Send(tgbotapi.NewMessage(
 		update.Message.Chat.ID, "Sucesso, agora é só dizer /balance!",
 	))
