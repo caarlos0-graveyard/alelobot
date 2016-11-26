@@ -83,6 +83,8 @@ func balance(ds datastore.Datastore, bot *tgbotapi.BotAPI, update tgbotapi.Updat
 		bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, err.Error()))
 		return
 	}
+	log.Println(client.Jar)
+	log.Println(client.Client)
 	cards, err := client.Cards()
 	if err != nil {
 		log.WithFields(log.Fields{
@@ -103,7 +105,7 @@ func balance(ds datastore.Datastore, bot *tgbotapi.BotAPI, update tgbotapi.Updat
 		if err != nil {
 			log.WithFields(log.Fields{
 				"ChatID":  update.Message.Chat.ID,
-				"From":    *update.Message.From,
+				"From":    update.Message.From.UserName,
 				"cpf":     cpf,
 				"card_id": card.ID,
 			}).Error(err.Error())
@@ -112,7 +114,7 @@ func balance(ds datastore.Datastore, bot *tgbotapi.BotAPI, update tgbotapi.Updat
 		}
 		log.WithFields(log.Fields{
 			"ChatID":  update.Message.Chat.ID,
-			"From":    *update.Message.From,
+			"From":    update.Message.From.UserName,
 			"cpf":     cpf,
 			"card_id": card.ID,
 		}).Info("Got user card's details", details)
@@ -138,7 +140,7 @@ func login(ds datastore.Datastore, bot *tgbotapi.BotAPI, update tgbotapi.Update)
 	if _, err := alelogo.New(cpf, pwd); err != nil {
 		log.WithFields(log.Fields{
 			"ChatID": update.Message.Chat.ID,
-			"From":   *update.Message.From,
+			"From":   update.Message.From.UserName,
 			"cpf":    cpf,
 		}).Error(err.Error())
 		bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, err.Error()))
@@ -147,7 +149,7 @@ func login(ds datastore.Datastore, bot *tgbotapi.BotAPI, update tgbotapi.Update)
 	if err := ds.Save(update.Message.From.ID, cpf, pwd); err != nil {
 		log.WithFields(log.Fields{
 			"ChatID": update.Message.Chat.ID,
-			"From":   *update.Message.From,
+			"From":   update.Message.From.UserName,
 			"cpf":    cpf,
 		}).Error(err.Error())
 		bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, err.Error()))
@@ -155,7 +157,7 @@ func login(ds datastore.Datastore, bot *tgbotapi.BotAPI, update tgbotapi.Update)
 	}
 	log.WithFields(log.Fields{
 		"ChatID": update.Message.Chat.ID,
-		"From":   *update.Message.From,
+		"From":   update.Message.From.UserName,
 		"cpf":    cpf,
 	}).Info("Login success")
 	bot.Send(tgbotapi.NewMessage(
