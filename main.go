@@ -1,11 +1,11 @@
 package main
 
 import (
-	"log"
 	"net/http"
 	"os"
 	"strings"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/caarlos0/alelobot/internal/datastore"
 	"github.com/caarlos0/alelogo"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
@@ -37,7 +37,10 @@ func main() {
 		if update.Message == nil {
 			continue
 		}
-		log.Println("Message from:", *update.Message.From)
+		log.WithFields(log.Fields{
+			"ChatID": update.Message.Chat.ID,
+			"From":   *update.Message.From,
+		}).Info("New Message")
 		if update.Message.Command() == "login" {
 			go login(ds, bot, update)
 			continue
@@ -46,7 +49,10 @@ func main() {
 			go balance(ds, bot, update)
 			continue
 		}
-		log.Println("Unknown command", update.Message.Text)
+		log.WithFields(log.Fields{
+			"ChatID": update.Message.Chat.ID,
+			"From":   *update.Message.From,
+		}).Info("Unknown command", update.Message.Text)
 		bot.Send(tgbotapi.NewMessage(
 			update.Message.Chat.ID,
 			"Os únicos comandos suportados são /login e /balance",
@@ -57,6 +63,10 @@ func main() {
 func balance(ds datastore.Datastore, bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	cpf, pwd, err := ds.Retrieve(update.Message.From.ID)
 	if cpf == "" || pwd == "" || err != nil {
+		log.WithFields(log.Fields{
+			"ChatID": update.Message.Chat.ID,
+			"From":   *update.Message.From,
+		}).Info("Not logged in, telling user to do that")
 		bot.Send(tgbotapi.NewMessage(
 			update.Message.Chat.ID,
 			"Por favor, faça /login...",
@@ -65,23 +75,47 @@ func balance(ds datastore.Datastore, bot *tgbotapi.BotAPI, update tgbotapi.Updat
 	}
 	client, err := alelogo.New(cpf, pwd)
 	if err != nil {
-		log.Println(err.Error())
+		log.WithFields(log.Fields{
+			"ChatID": update.Message.Chat.ID,
+			"From":   *update.Message.From,
+			"cpf":    cpf,
+		}).Info(err.Error())
 		bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, err.Error()))
 		return
 	}
 	cards, err := client.Cards()
 	if err != nil {
-		log.Println(err.Error())
+		log.WithFields(log.Fields{
+			"ChatID": update.Message.Chat.ID,
+			"From":   *update.Message.From,
+			"cpf":    cpf,
+		}).Info(err.Error())
 		bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, err.Error()))
 		return
 	}
+	log.WithFields(log.Fields{
+		"ChatID": update.Message.Chat.ID,
+		"From":   *update.Message.From,
+		"cpf":    cpf,
+	}).Info("Got user cards", cards)
 	for _, card := range cards {
 		details, err := client.Details(card)
 		if err != nil {
-			log.Println(err.Error())
+			log.WithFields(log.Fields{
+				"ChatID":  update.Message.Chat.ID,
+				"From":    *update.Message.From,
+				"cpf":     cpf,
+				"card_id": card.ID,
+			}).Info(err.Error())
 			bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, err.Error()))
 			return
 		}
+		log.WithFields(log.Fields{
+			"ChatID":  update.Message.Chat.ID,
+			"From":    *update.Message.From,
+			"cpf":     cpf,
+			"card_id": card.ID,
+		}).Info("Got user card's details", details)
 		bot.Send(tgbotapi.NewMessage(
 			update.Message.Chat.ID,
 			"Saldo do cartão "+strings.TrimSpace(card.Title)+" é "+details.Balance,

@@ -6,3 +6,5 @@ import:
   version: ~1.0.0
   subpackages:
   - redis
+- package: github.com/Sirupsen/logrus
+  version: ~0.11.0

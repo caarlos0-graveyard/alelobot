@@ -1,5 +1,5 @@
-hash: bc8cf71d2c43e74fe7f0a17f6c72cccd52bd75f93bd6b417bfec8926f7efa308
-updated: 2016-11-23T19:05:33.423860086-02:00
+hash: 10bbf5743f2c6db9482d4ace50700b068196f5d8c8628f61c0655b124ca85eb4
+updated: 2016-11-26T10:28:23.408430153-02:00
 imports:
 - name: github.com/caarlos0/alelogo
   version: 860bbd3bba84b8011afede9516243a772b57a5e8
@@ -10,6 +10,12 @@ imports:
   - redis
 - name: github.com/go-telegram-bot-api/telegram-bot-api
   version: a7f48eb2dd301356942677e65bebe0c9aef07013
+- name: github.com/Sirupsen/logrus
+  version: d26492970760ca5d33129d2d799e34be5c4782eb
 - name: github.com/technoweenie/multipartstreamer
   version: a90a01d73ae432e2611d178c18367fbaa13e0154
+- name: golang.org/x/sys
+  version: 9d4e42a20653790449273b3c85e67d6d8bae6e2e
+  subpackages:
+  - unix
 testImports: []
