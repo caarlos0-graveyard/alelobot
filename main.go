@@ -142,7 +142,7 @@ func serve() {
 			http.Error(
 				w,
 				"Can't connect to Alelo API",
-				http.StatusInternalServerError,
+				http.StatusServiceUnavailable,
 			)
 			return
 		}
