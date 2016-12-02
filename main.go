@@ -139,7 +139,11 @@ func serve() {
 		pwd := os.Getenv("TEST_PWD")
 		_, err := alelo.AllDetails(cpf, pwd)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(
+				w,
+				"Can't connect to Alelo API",
+				http.StatusInternalServerError,
+			)
 			return
 		}
 		w.Write([]byte("OK"))
