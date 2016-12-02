@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/caarlos0/alelobot/internal/alelo"
 	"github.com/caarlos0/alelobot/internal/datastore"
 	"github.com/caarlos0/alelogo"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
@@ -73,52 +74,21 @@ func balance(ds datastore.Datastore, bot *tgbotapi.BotAPI, update tgbotapi.Updat
 		))
 		return
 	}
-	client, err := alelogo.New(cpf, pwd)
+	details, err := alelo.AllDetails(cpf, pwd)
 	if err != nil {
-		log.WithFields(log.Fields{
-			"ChatID": update.Message.Chat.ID,
-			"From":   update.Message.From.UserName,
-			"cpf":    cpf,
-		}).Error(err.Error())
 		bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, err.Error()))
 		return
 	}
-	cards, err := client.Cards()
-	if err != nil {
-		log.WithFields(log.Fields{
-			"ChatID": update.Message.Chat.ID,
-			"From":   update.Message.From.UserName,
-			"cpf":    cpf,
-		}).Error(err.Error())
-		bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, err.Error()))
-		return
-	}
-	log.WithFields(log.Fields{
-		"ChatID": update.Message.Chat.ID,
-		"From":   update.Message.From.UserName,
-		"cpf":    cpf,
-	}).Info("Got user cards", cards)
-	for _, card := range cards {
-		details, err := client.Details(card)
-		if err != nil {
-			log.WithFields(log.Fields{
-				"ChatID":  update.Message.Chat.ID,
-				"From":    update.Message.From.UserName,
-				"cpf":     cpf,
-				"card_id": card.ID,
-			}).Error(err.Error())
-			bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, err.Error()))
-			return
-		}
+	for _, detail := range details {
 		log.WithFields(log.Fields{
 			"ChatID":  update.Message.Chat.ID,
 			"From":    update.Message.From.UserName,
 			"cpf":     cpf,
-			"card_id": card.ID,
+			"card_id": detail.Number,
 		}).Info("Got user card's details", details)
 		bot.Send(tgbotapi.NewMessage(
 			update.Message.Chat.ID,
-			"Saldo do cartão "+details.Number+" é "+details.Balance,
+			"Saldo do cartão "+detail.Number+" é "+detail.Balance,
 		))
 	}
 }
@@ -165,6 +135,13 @@ func login(ds datastore.Datastore, bot *tgbotapi.BotAPI, update tgbotapi.Update)
 
 func serve() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		cpf := os.Getenv("TEST_CPF")
+		pwd := os.Getenv("TEST_PWD")
+		_, err := alelo.AllDetails(cpf, pwd)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 		w.Write([]byte("OK"))
 	})
 	http.ListenAndServe(":"+os.Getenv("PORT"), nil)
