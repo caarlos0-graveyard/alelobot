@@ -1,4 +1,4 @@
-# alelobot [![Build Status](https://travis-ci.org/caarlos0/alelobot.svg?branch=master)](https://travis-ci.org/caarlos0/alelobot)
+# alelobot [![Build Status](https://travis-ci.org/caarlos0/alelobot.svg?branch=master)](https://travis-ci.org/caarlos0/alelobot) [![SayThanks.io](https://img.shields.io/badge/SayThanks.io-%E2%98%BC-1EAEDB.svg?style=flat-square)](https://saythanks.io/to/caarlos0)
 
 A Telegram bot to get Alelo card's balance!
 
